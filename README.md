@@ -48,11 +48,21 @@ The header chevron (`▼` / `▶`) toggles collapse. Live entries show `Running`
 
 ### Option A — From GitHub (recommended for now)
 
-Add the GitHub spec to your OpenCode config. Edit `~/.config/opencode/opencode.json` (or `~/.config/opencode/tui.json`) and append to the `plugin` array:
+Add the GitHub spec to your OpenCode config. Edit `~/.config/opencode/opencode.json` (or `~/.config/opencode/tui.json`) and append to the `plugin` array. **Pinning to a tag is recommended** — see [Updating](#updating) below for why:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "github:psh4607/opencode-agent-sidebar#v0.1.0"
+  ]
+}
+```
+
+Or, to track the latest `main` (manual cache deletion required to upgrade — see [Updating](#updating)):
+
+```json
+{
   "plugin": [
     "github:psh4607/opencode-agent-sidebar"
   ]
@@ -104,6 +114,43 @@ No config file needed. The plugin exposes one toggle:
 | Show / hide the Agents panel | `/agents-toggle` | `Ctrl+x a` |
 
 State is persisted to OpenCode's KV store (`agents-panel.collapsed`) and survives restarts.
+
+---
+
+## Updating
+
+OpenCode caches plugins indefinitely under `~/.cache/opencode/packages/<spec>/` once installed; there is **no automatic update path**. To pick up a new version you must either change the spec to a newer tag or manually clear the cache.
+
+### Option 1 — Pin to a tag (recommended)
+
+Edit your `opencode.json` plugin entry to bump the tag suffix:
+
+```diff
+- "github:psh4607/opencode-agent-sidebar#v0.1.0"
++ "github:psh4607/opencode-agent-sidebar#v0.1.1"
+```
+
+Restart OpenCode. Each tag has its own cache directory, so the new version is fetched cleanly without touching the old one.
+
+### Option 2 — Track latest `main`
+
+If your spec is the bare `github:psh4607/opencode-agent-sidebar` (no tag), upgrading requires a manual cache delete:
+
+```bash
+rm -rf ~/.cache/opencode/packages/'github:psh4607:opencode-agent-sidebar'*
+```
+
+If your shell expands the path differently, this fallback works on any layout:
+
+```bash
+find ~/.cache/opencode/packages -maxdepth 1 -name '*psh4607*' -exec rm -rf {} +
+```
+
+Then restart OpenCode. The plugin is re-fetched from `main`.
+
+### Why `opencode plugin -f` does not work
+
+As of OpenCode v1.14.x, `opencode plugin <spec> -f` only rewrites your `opencode.json` config — it does **not** refresh the cached plugin code. If you've already loaded the plugin once, `-f` will leave the old version in place. Use one of the two options above instead.
 
 ---
 
