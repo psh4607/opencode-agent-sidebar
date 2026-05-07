@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.2] — 2026-05-07
+
+### Fixed
+
+- Stale "Running" entries no longer linger in the sidebar after a TUI restart. Background-task status markers (`[BACKGROUND TASK COMPLETED]`, `[ALL BACKGROUND TASKS COMPLETE]`) live inside `system-reminder` text parts that have empty `time.start` / `time.end` fields. The previous `if (completedAt)` guard inside `scanSessionState` silently skipped those parts on rescan, leaving completed background entries stuck as `Running` forever. The guard is removed and the timestamp falls back to `Date.now()`, matching the behaviour of the live `handlePart` event path.
+
 ### Docs
 
 - README Preview section now embeds a live screenshot ([assets/sidebar-demo.png](assets/sidebar-demo.png)) of the sidebar with multiple sub-agents running, replacing the ASCII placeholder.
@@ -39,7 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Auto-cleanup of completed entries after ~10 seconds.
 - Zero-config `github:` install — bundled `dist/` ships with the repo, no build step required at install time.
 
-[Unreleased]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.2
 [0.2.1]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.1
 [0.2.0]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.0
 [0.1.0]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.1.0

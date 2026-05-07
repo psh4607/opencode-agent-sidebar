@@ -3,7 +3,7 @@ import { createElement, insert, setProp } from "@opentui/solid";
 import { createSignal } from "solid-js";
 import { createUpdateNotifier } from "./update-notifier.js";
 const PLUGIN_ID = "subagent-sidebar";
-const PLUGIN_VERSION = "0.2.1";
+const PLUGIN_VERSION = "0.2.2";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
 const COMPLETION_RETENTION_MS = 10_000;
@@ -331,9 +331,9 @@ const tui = async (api) => {
                 mutated = upsertToolPart(sessionID, part) || mutated;
                 mutated = upsertSubtaskPart(sessionID, part) || mutated;
                 mutated = upsertAgentPart(sessionID, part) || mutated;
-                const completedAt = part.time?.end ?? part.time?.start;
-                if (completedAt)
-                    mutated = handleBackgroundStatusText(sessionID, part, completedAt) || mutated;
+                // system-reminder parts lack time fields; mirror handlePart fallback so BG completion isn't dropped on rescan.
+                const completedAt = part.time?.end ?? part.time?.start ?? Date.now();
+                mutated = handleBackgroundStatusText(sessionID, part, completedAt) || mutated;
             }
         }
         return mutated;
