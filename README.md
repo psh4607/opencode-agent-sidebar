@@ -33,6 +33,7 @@ The header chevron (`▼` / `▶`) toggles collapse. Live entries show `Running`
 - **Per-session filtering** — only shows agents from the currently focused sidebar session.
 - **Auto-cleanup** — completed entries fade after 10 seconds; nothing accumulates forever.
 - **Collapsible** — toggle via slash command `/agents-toggle` or keybind `Ctrl+x a`. State persists across restarts.
+- **Update notifier** — once a day the sidebar header shows `[⬆ vX.Y.Z available]` if a newer GitHub release exists. Read-only — never self-updates.
 - **Zero config** — drop it in your plugin list and restart.
 
 ---
@@ -54,7 +55,7 @@ Add the GitHub spec to your OpenCode config. Edit `~/.config/opencode/opencode.j
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "github:psh4607/opencode-agent-sidebar#v0.1.0"
+    "github:psh4607/opencode-agent-sidebar#v0.2.0"
   ]
 }
 ```
@@ -127,7 +128,7 @@ Edit your `opencode.json` plugin entry to bump the tag suffix:
 
 ```diff
 - "github:psh4607/opencode-agent-sidebar#v0.1.0"
-+ "github:psh4607/opencode-agent-sidebar#v0.1.1"
++ "github:psh4607/opencode-agent-sidebar#v0.2.0"
 ```
 
 Restart OpenCode. Each tag has its own cache directory, so the new version is fetched cleanly without touching the old one.
@@ -178,6 +179,7 @@ No JSX is used; the renderer is invoked via `createElement` / `setProp` / `inser
 
 | Plugin version | OpenCode |
 | --- | --- |
+| `0.2.x` | `>= 1.14.39` |
 | `0.1.x` | `>= 1.14.39` |
 
 If you're on an older OpenCode, the TUI plugin slot system (`sidebar_content`) and the `message.part.updated` event payload shape may differ; please open an issue.

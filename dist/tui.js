@@ -1,6 +1,8 @@
 import { createElement, insert, setProp } from "@opentui/solid";
 import { createSignal } from "solid-js";
+import { createUpdateNotifier } from "./update-notifier.js";
 const PLUGIN_ID = "subagent-sidebar";
+const PLUGIN_VERSION = "0.2.0";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
 const COMPLETION_RETENTION_MS = 10_000;
@@ -42,9 +44,11 @@ const tui = async (api) => {
     const [now, setNow] = createSignal(Date.now());
     const [version, setVersion] = createSignal(0);
     const [collapsed, setCollapsed] = createSignal(api.kv.get(COLLAPSED_KV_KEY, false));
+    const [updateStatus, setUpdateStatus] = createSignal(null);
     const bumpVersion = () => {
         setVersion((value) => value + 1);
     };
+    const updateNotifier = createUpdateNotifier(api, PLUGIN_VERSION, setUpdateStatus);
     const toggleCollapsed = () => {
         const next = !collapsed();
         setCollapsed(next);
@@ -390,6 +394,7 @@ const tui = async (api) => {
     ];
     api.lifecycle.onDispose(() => {
         clearInterval(tickTimer);
+        updateNotifier.dispose();
         unregisterCommand();
         for (const unsubscribe of unsubscribers)
             unsubscribe();
@@ -418,11 +423,12 @@ const tui = async (api) => {
             }
             version();
             const tick = now();
-            return renderChildren(sessionID, tick, collapsed());
+            const status = updateStatus();
+            return renderChildren(sessionID, tick, collapsed(), status);
         });
         return box;
     }
-    function renderChildren(sessionID, tickNow, isCollapsed) {
+    function renderChildren(sessionID, tickNow, isCollapsed, status) {
         const inSession = [];
         for (const entry of active.values()) {
             if (entry.sessionID === sessionID)
@@ -435,7 +441,7 @@ const tui = async (api) => {
         const visibleEntries = [...main, ...fg, ...bg];
         const live = visibleEntries.filter(isLive).length;
         const done = visibleEntries.length - live;
-        const nodes = [renderHeader(visibleEntries.length, live, done, isCollapsed)];
+        const nodes = [renderHeader(visibleEntries.length, live, done, isCollapsed, status)];
         if (isCollapsed)
             return nodes;
         if (visibleEntries.length === 0) {
@@ -484,9 +490,10 @@ function appendGroup(nodes, label, entries, tickNow, showLabel) {
             nodes.push(desc);
     }
 }
-function renderHeader(total, live, done, isCollapsed) {
+function renderHeader(total, live, done, isCollapsed, status) {
     const chevron = isCollapsed ? "▶" : "▼";
-    return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}`, { fg: "white", bold: true });
+    const updateSuffix = status?.isUpdateAvailable ? `  [⬆ v${status.latest} available]` : "";
+    return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}${updateSuffix}`, { fg: "white", bold: true });
 }
 function buildCountSuffix(total, live, done) {
     if (total === 0)

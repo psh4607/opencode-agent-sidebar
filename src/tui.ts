@@ -1,8 +1,10 @@
 import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@opencode-ai/plugin/tui";
 import { createElement, insert, setProp } from "@opentui/solid";
 import { createSignal } from "solid-js";
+import { createUpdateNotifier, type UpdateStatus } from "./update-notifier.js";
 
 const PLUGIN_ID = "subagent-sidebar";
+const PLUGIN_VERSION = "0.2.0";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
 const COMPLETION_RETENTION_MS = 10_000;
@@ -112,9 +114,12 @@ const tui: TuiPlugin = async (api: TuiPluginApi) => {
   const [now, setNow] = createSignal(Date.now());
   const [version, setVersion] = createSignal(0);
   const [collapsed, setCollapsed] = createSignal<boolean>(api.kv.get(COLLAPSED_KV_KEY, false));
+  const [updateStatus, setUpdateStatus] = createSignal<UpdateStatus | null>(null);
   const bumpVersion = (): void => {
     setVersion((value) => value + 1);
   };
+
+  const updateNotifier = createUpdateNotifier(api, PLUGIN_VERSION, setUpdateStatus);
 
   const toggleCollapsed = (): void => {
     const next = !collapsed();
@@ -454,6 +459,7 @@ const tui: TuiPlugin = async (api: TuiPluginApi) => {
 
   api.lifecycle.onDispose(() => {
     clearInterval(tickTimer);
+    updateNotifier.dispose();
     unregisterCommand();
     for (const unsubscribe of unsubscribers) unsubscribe();
     active.clear();
@@ -484,13 +490,14 @@ const tui: TuiPlugin = async (api: TuiPluginApi) => {
       }
       version();
       const tick = now();
-      return renderChildren(sessionID, tick, collapsed());
+      const status = updateStatus();
+      return renderChildren(sessionID, tick, collapsed(), status);
     });
 
     return box;
   }
 
-  function renderChildren(sessionID: string, tickNow: number, isCollapsed: boolean): unknown[] {
+  function renderChildren(sessionID: string, tickNow: number, isCollapsed: boolean, status: UpdateStatus | null): unknown[] {
     const inSession: AgentEntry[] = [];
     for (const entry of active.values()) {
       if (entry.sessionID === sessionID) inSession.push(entry);
@@ -504,7 +511,7 @@ const tui: TuiPlugin = async (api: TuiPluginApi) => {
     const live = visibleEntries.filter(isLive).length;
     const done = visibleEntries.length - live;
 
-    const nodes: unknown[] = [renderHeader(visibleEntries.length, live, done, isCollapsed)];
+    const nodes: unknown[] = [renderHeader(visibleEntries.length, live, done, isCollapsed, status)];
 
     if (isCollapsed) return nodes;
 
@@ -553,9 +560,10 @@ function appendGroup(nodes: unknown[], label: string, entries: AgentEntry[], tic
   }
 }
 
-function renderHeader(total: number, live: number, done: number, isCollapsed: boolean): unknown {
+function renderHeader(total: number, live: number, done: number, isCollapsed: boolean, status: UpdateStatus | null): unknown {
   const chevron = isCollapsed ? "▶" : "▼";
-  return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}`, { fg: "white", bold: true });
+  const updateSuffix = status?.isUpdateAvailable ? `  [⬆ v${status.latest} available]` : "";
+  return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}${updateSuffix}`, { fg: "white", bold: true });
 }
 
 function buildCountSuffix(total: number, live: number, done: number): string {
