@@ -1,10 +1,12 @@
 import type { TuiPlugin, TuiPluginApi, TuiPluginModule } from "@opencode-ai/plugin/tui";
+import type { MouseEvent } from "@opentui/core";
+import { MouseButton } from "@opentui/core";
 import { createElement, insert, setProp } from "@opentui/solid";
 import { createSignal } from "solid-js";
 import { createUpdateNotifier, type UpdateStatus } from "./update-notifier.js";
 
 const PLUGIN_ID = "subagent-sidebar";
-const PLUGIN_VERSION = "0.2.0";
+const PLUGIN_VERSION = "0.2.1";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
 const COMPLETION_RETENTION_MS = 10_000;
@@ -511,7 +513,7 @@ const tui: TuiPlugin = async (api: TuiPluginApi) => {
     const live = visibleEntries.filter(isLive).length;
     const done = visibleEntries.length - live;
 
-    const nodes: unknown[] = [renderHeader(visibleEntries.length, live, done, isCollapsed, status)];
+    const nodes: unknown[] = [renderHeader(visibleEntries.length, live, done, isCollapsed, status, toggleCollapsed)];
 
     if (isCollapsed) return nodes;
 
@@ -560,10 +562,30 @@ function appendGroup(nodes: unknown[], label: string, entries: AgentEntry[], tic
   }
 }
 
-function renderHeader(total: number, live: number, done: number, isCollapsed: boolean, status: UpdateStatus | null): unknown {
+function renderHeader(
+  total: number,
+  live: number,
+  done: number,
+  isCollapsed: boolean,
+  status: UpdateStatus | null,
+  onToggle?: () => void,
+): unknown {
   const chevron = isCollapsed ? "▶" : "▼";
   const updateSuffix = status?.isUpdateAvailable ? `  [⬆ v${status.latest} available]` : "";
-  return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}${updateSuffix}`, { fg: "white", bold: true });
+  const handleMouseDown = onToggle
+    ? (event: MouseEvent): void => {
+        if (event.button !== MouseButton.LEFT) return;
+        event.stopPropagation();
+        onToggle();
+      }
+    : undefined;
+  return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}${updateSuffix}`, {
+    fg: "white",
+    bold: true,
+    width: "100%",
+    selectable: false,
+    onMouseDown: handleMouseDown,
+  });
 }
 
 function buildCountSuffix(total: number, live: number, done: number): string {

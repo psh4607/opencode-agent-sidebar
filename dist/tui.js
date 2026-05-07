@@ -1,8 +1,9 @@
+import { MouseButton } from "@opentui/core";
 import { createElement, insert, setProp } from "@opentui/solid";
 import { createSignal } from "solid-js";
 import { createUpdateNotifier } from "./update-notifier.js";
 const PLUGIN_ID = "subagent-sidebar";
-const PLUGIN_VERSION = "0.2.0";
+const PLUGIN_VERSION = "0.2.1";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
 const COMPLETION_RETENTION_MS = 10_000;
@@ -441,7 +442,7 @@ const tui = async (api) => {
         const visibleEntries = [...main, ...fg, ...bg];
         const live = visibleEntries.filter(isLive).length;
         const done = visibleEntries.length - live;
-        const nodes = [renderHeader(visibleEntries.length, live, done, isCollapsed, status)];
+        const nodes = [renderHeader(visibleEntries.length, live, done, isCollapsed, status, toggleCollapsed)];
         if (isCollapsed)
             return nodes;
         if (visibleEntries.length === 0) {
@@ -490,10 +491,24 @@ function appendGroup(nodes, label, entries, tickNow, showLabel) {
             nodes.push(desc);
     }
 }
-function renderHeader(total, live, done, isCollapsed, status) {
+function renderHeader(total, live, done, isCollapsed, status, onToggle) {
     const chevron = isCollapsed ? "▶" : "▼";
     const updateSuffix = status?.isUpdateAvailable ? `  [⬆ v${status.latest} available]` : "";
-    return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}${updateSuffix}`, { fg: "white", bold: true });
+    const handleMouseDown = onToggle
+        ? (event) => {
+            if (event.button !== MouseButton.LEFT)
+                return;
+            event.stopPropagation();
+            onToggle();
+        }
+        : undefined;
+    return makeText(`${chevron} Agents ${buildCountSuffix(total, live, done)}${updateSuffix}`, {
+        fg: "white",
+        bold: true,
+        width: "100%",
+        selectable: false,
+        onMouseDown: handleMouseDown,
+    });
 }
 function buildCountSuffix(total, live, done) {
     if (total === 0)

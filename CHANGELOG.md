@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-05-07
+
+### Added
+
+- Click-to-toggle on the `▶ / ▼ Agents` header row. Left-clicking anywhere on the header line now expands or collapses the panel (parity with the built-in MCP panel). The existing `/agents-toggle` slash command and `Ctrl+x a` keybind continue to work.
+
+### Fixed
+
+- Header row no longer leaves an inverted-text selection highlight after clicking. The header text is now `selectable: false`, so the mouse-down that triggers the toggle does not start a stray text selection.
+
 ## [0.2.0] — 2026-05-07
 
 ### Added
@@ -25,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Auto-cleanup of completed entries after ~10 seconds.
 - Zero-config `github:` install — bundled `dist/` ships with the repo, no build step required at install time.
 
-[Unreleased]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.1
 [0.2.0]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.0
 [0.1.0]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.1.0
