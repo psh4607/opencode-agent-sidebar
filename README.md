@@ -8,20 +8,11 @@ OpenCode TUI plugin that surfaces real-time sub-agent activity in the sidebar �
 
 ## Preview
 
-```
-▼ Agents (5 active, 1 done)
-  • explore Running 1m 17s
-    Inventory DDS/UI imports …
-  • explore Running 14m 32s
-    Map account/profile/avatar…
-  • explore Running 14m 43s
-    Map auth and middleware s…
-  background
-  • Momus — Plan Critic Done 1m 47s
-    Review SCM extract plan
-```
+<p align="center">
+  <img src="assets/sidebar-demo.png" alt="Active sidebar with the main Sisyphus agent and three running explore sub-agents" />
+</p>
 
-The header chevron (`▼` / `▶`) toggles collapse. Live entries show `Running`, completed ones linger ~10s with `Done` / `Error`.
+Live sidebar showing the active main agent plus three foreground `explore` sub-agents with elapsed timers. Click the `▼ / ▶` header anywhere on the row to collapse, or use the `/agents-toggle` slash command (`Ctrl+x a`). Live entries show `Running`; completed ones linger ~10s with `Done` / `Error` before fading.
 
 ---
 

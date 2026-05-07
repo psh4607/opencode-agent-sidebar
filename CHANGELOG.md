@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Docs
+
+- README Preview section now embeds a live screenshot ([assets/sidebar-demo.png](assets/sidebar-demo.png)) of the sidebar with multiple sub-agents running, replacing the ASCII placeholder.
+
 ## [0.2.1] — 2026-05-07
 
 ### Added
