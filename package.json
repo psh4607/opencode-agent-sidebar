@@ -1,0 +1,82 @@
+{
+  "name": "@psh4607/opencode-agent-sidebar",
+  "version": "0.1.0",
+  "description": "OpenCode TUI plugin showing real-time sub-agent activity (foreground/background tasks, live elapsed timer) in the sidebar.",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Seongho Bak",
+    "email": "psh30095@gmail.com",
+    "url": "https://github.com/psh4607"
+  },
+  "homepage": "https://github.com/psh4607/opencode-agent-sidebar#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psh4607/opencode-agent-sidebar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/psh4607/opencode-agent-sidebar/issues"
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./tui": {
+      "types": "./dist/tui.d.ts",
+      "import": "./dist/tui.js"
+    }
+  },
+  "oc-plugin": [
+    "server",
+    "tui"
+  ],
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run clean && bun run build"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "tui",
+    "sidebar",
+    "subagent",
+    "agent",
+    "task",
+    "delegate",
+    "observability"
+  ],
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.4.3",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.1.92",
+    "@opentui/solid": "^0.1.92",
+    "solid-js": "^1.9.10"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "^1.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,27 @@
+node_modules/
+
+# Build output: tracked so `github:owner/repo` installs are zero-config.
+# Regenerate via `bun run build` after edits to src/.
+# dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local handoff / dev notes
+AGENTS.md
+.handoff/
+.sisyphus/
+
+# Bun / npm
+.npmrc
