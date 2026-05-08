@@ -3,7 +3,7 @@ import { createElement, insert, setProp } from "@opentui/solid";
 import { createSignal } from "solid-js";
 import { createUpdateNotifier } from "./update-notifier.js";
 const PLUGIN_ID = "subagent-sidebar";
-const PLUGIN_VERSION = "0.2.3";
+const PLUGIN_VERSION = "0.2.4";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
 const COMPLETION_RETENTION_MS = 3_000;
@@ -249,18 +249,14 @@ const tui = async (api) => {
                 const promoted = active.get(bgKey);
                 if (promoted)
                     return touchEntry(promoted, agent, description);
-                active.set(bgKey, {
-                    key: bgKey,
-                    sessionID,
-                    kind: "background",
-                    agent,
-                    description,
-                    status: "running",
-                    startedAt,
-                    bgID,
-                    callID,
-                });
-                return true;
+                // Live launches always pass through pending/running before reaching
+                // completed, so observing status="completed" with no in-flight entry
+                // means scanSessionState is replaying a historical message. Resurrecting
+                // here would stamp startedAt to part.time.start (potentially hours old)
+                // and let handleBackgroundStatusText finalize completedAt = Date.now()
+                // on the next tick, producing a spurious "Done 1230m" row before
+                // retention prunes it.
+                return false;
             }
             const existing = active.get(key);
             if (!existing)
@@ -307,20 +303,9 @@ const tui = async (api) => {
                         mutated = touchEntry(existing, existing.agent, description) || mutated;
                     mutated = completeEntry(existing, "completed", completedAt) || mutated;
                 }
-                else if (!isExpired(completedAt, Date.now())) {
-                    active.set(key, {
-                        key,
-                        sessionID,
-                        kind: "background",
-                        agent: "agent",
-                        description,
-                        status: "completed",
-                        startedAt: completedAt,
-                        completedAt,
-                        bgID,
-                    });
-                    mutated = true;
-                }
+                // No in-flight entry: same reasoning as upsertToolPart's completed
+                // branch — fabricating a row from a system reminder match alone
+                // means we're staring at historical message text. Don't resurrect.
             }
         }
         return mutated;
