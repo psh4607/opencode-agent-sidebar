@@ -6,10 +6,10 @@ import { createSignal } from "solid-js";
 import { createUpdateNotifier, type UpdateStatus } from "./update-notifier.js";
 
 const PLUGIN_ID = "subagent-sidebar";
-const PLUGIN_VERSION = "0.2.2";
+const PLUGIN_VERSION = "0.2.3";
 const SIDEBAR_ORDER = 200;
 const TICK_INTERVAL_MS = 1000;
-const COMPLETION_RETENTION_MS = 10_000;
+const COMPLETION_RETENTION_MS = 3_000;
 const DESCRIPTION_MAX_LEN = 26;
 const COLLAPSED_KV_KEY = "agents-panel.collapsed";
 
@@ -156,10 +156,16 @@ const tui: TuiPlugin = async (api: TuiPluginApi) => {
 
   const completeEntry = (entry: AgentEntry, status: AgentStatus, completedAt: number): boolean => {
     const nextStatus = status === "error" ? "error" : "completed";
-    const mutated = entry.status !== nextStatus || entry.completedAt !== completedAt;
-    entry.status = nextStatus;
-    entry.completedAt = completedAt;
-    return mutated;
+    const statusChanged = entry.status !== nextStatus;
+    // Stamp completedAt only on the first transition to a terminal state.
+    // Re-stamping (e.g. when scanSessionState re-matches the same
+    // [ALL BACKGROUND TASKS COMPLETE] system reminder on every 1s tick) would
+    // make the elapsed timer keep climbing past completion, so a "Done" entry
+    // visually behaves like it's still running.
+    const stampChanged = entry.completedAt === undefined;
+    if (stampChanged) entry.completedAt = completedAt;
+    if (statusChanged) entry.status = nextStatus;
+    return statusChanged || stampChanged;
   };
 
   const promoteCallIDToBgID = (callID: string, bgID: string): boolean => {
