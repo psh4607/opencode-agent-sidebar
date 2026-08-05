@@ -14,17 +14,17 @@ OpenCode TUI plugin that surfaces real-time sub-agent activity in the sidebar �
 
 </p>
 
-Live sidebar showing the active main agent plus three foreground `explore` sub-agents with elapsed timers. Click the `▼ / ▶` header anywhere on the row to collapse, or use the `/agents-toggle` slash command (`Ctrl+x a`). Live entries show `Running`; completed ones linger ~10s with `Done` / `Error` before fading.
+Live sidebar showing the active main agent plus three foreground `explore` sub-agents with elapsed timers. Click the `▼ / ▶` header anywhere on the row to collapse, or use the `/agents-toggle` slash command (`Ctrl+x a`). Live entries show `Running`; completed ones linger ~3s with `Done` / `Error` before fading.
 
 ---
 
 ## Features
 
 - **Live elapsed timer** — Solid.js signal-driven, the seconds actually tick up every second (no waiting for the next event).
-- **Foreground vs background separation** — `task(run_in_background=true)` and `delegate(...)` jobs are grouped separately from synchronous `task(...)` calls.
-- **Main agent visibility** — the assistant's own active turn is shown when applicable.
+- **Foreground vs background separation** — native `task(background=true)` and `delegate(...)` jobs are grouped separately from synchronous `task(...)` calls; the older `run_in_background` field remains supported.
+- **Main agent visibility** — the assistant's own turn appears only while its session is busy or retrying.
 - **Per-session filtering** — only shows agents from the currently focused sidebar session.
-- **Auto-cleanup** — completed entries fade after 10 seconds; nothing accumulates forever.
+- **Auto-cleanup** — completed entries fade after about 3 seconds; nothing accumulates forever.
 - **Collapsible** — toggle via slash command `/agents-toggle` or keybind `Ctrl+x a`. State persists across restarts.
 - **Update notifier** — once a day the sidebar header shows `[⬆ vX.Y.Z available]` if a newer GitHub release exists. Read-only — never self-updates.
 - **Zero config** — drop it in your plugin list and restart.
@@ -33,7 +33,7 @@ Live sidebar showing the active main agent plus three foreground `explore` sub-a
 
 ## Requirements
 
-- **OpenCode** v1.14.39 or newer (TUI plugin slots, `message.part.updated` event payload shape).
+- **OpenCode** v1.14.39 or newer (TUI plugin slots and reactive state APIs).
 - **Bun** (OpenCode runs on Bun; no separate runtime needed).
 
 ---
@@ -150,19 +150,11 @@ As of OpenCode v1.14.x, `opencode plugin <spec> -f` only rewrites your `opencode
 
 ## How it works
 
-The plugin subscribes to three events from the OpenCode TUI runtime:
+The panel derives each snapshot from OpenCode's reactive message, part, and session-status state. Rows originate only from real `task` / `delegate` tool parts, so persistent `subtask` command metadata and `agent` prompt mentions cannot become false running work. Removing a tool part removes its row on the next reactive update without depending on an event payload shape.
 
-| Event | What it does |
-| --- | --- |
-| `message.part.updated` | Tracks `task` / `delegate` tool-call lifecycle (`pending` → `running` → `completed` / `error`). Also parses `[BACKGROUND TASK …]` system reminder text to update background job status. |
-| `message.updated` | Tracks the main assistant turn (so the active agent itself is visible). |
-| `message.part.removed` | Cleans up entries when their underlying part is dropped. |
+Native background Task rows follow their `metadata.sessionId` / `metadata.jobId` child session through busy, retry, and idle states even after the parent tool call completes. Resumed invocations are deduplicated immediately through `input.task_id`, before refreshed child metadata arrives. Existing OMO/legacy `delegate`, `run_in_background`, `backgroundTaskId`, output-ID, and background-reminder formats remain supported, but their reminders only update rows that originated from a real tool part.
 
-Internally the panel is built with [`@opentui/solid`](https://github.com/anomalyco/opentui) using Solid signals:
-
-- A `now` signal ticks every second so elapsed durations re-render reactively.
-- A `version` signal increments on any state change to invalidate the panel's `insert(...)` accessor.
-- Background-task ID promotion (call ID → `bg_…` ID) is handled when the launching tool call completes.
+Internally the panel is built with [`@opentui/solid`](https://github.com/anomalyco/opentui) using Solid signals. A `now` signal ticks every second for elapsed durations, while a small lifecycle tracker preserves queued start times and terminal transitions for the three-second retention window.
 
 No JSX is used; the renderer is invoked via `createElement` / `setProp` / `insert` from `@opentui/solid` so no Babel/JSX transform pipeline is required at install time.
 
@@ -175,7 +167,7 @@ No JSX is used; the renderer is invoked via `createElement` / `setProp` / `inser
 | `0.2.x` | `>= 1.14.39` |
 | `0.1.x` | `>= 1.14.39` |
 
-If you're on an older OpenCode, the TUI plugin slot system (`sidebar_content`) and the `message.part.updated` event payload shape may differ; please open an issue.
+If you're on an older OpenCode, the TUI plugin slot system (`sidebar_content`) and reactive state APIs may differ; please open an issue.
 
 ---
 
@@ -183,6 +175,7 @@ If you're on an older OpenCode, the TUI plugin slot system (`sidebar_content`) a
 
 ```bash
 bun install
+bun run test        # deterministic lifecycle regression tests
 bun run typecheck   # tsc --noEmit
 bun run build       # tsc → dist/
 ```
@@ -193,14 +186,17 @@ While iterating, point your OpenCode config at the local path (Option B above) a
 
 ```
 src/
-  server.ts   # no-op server-side plugin (keeps oc-plugin contract happy)
-  tui.ts      # the actual sidebar logic
+  agent-sidebar-state.ts  # pure lifecycle and compatibility helpers
+  server.ts               # no-op server-side plugin (keeps oc-plugin contract happy)
+  tui.ts                  # the actual sidebar logic
+test/
+  agent-sidebar-state.test.ts
 dist/         # built output (committed so `github:` installs are zero-config; regenerate via `bun run build`)
 ```
 
 ### Pull requests
 
-Please run `bun run typecheck` and `bun run build` before submitting. Keep changes minimal and focused — bug fixes shouldn't bring along unrelated refactors.
+Please run `bun run test`, `bun run typecheck`, and `bun run build` before submitting. Keep changes minimal and focused — bug fixes shouldn't bring along unrelated refactors.
 
 ---
 
