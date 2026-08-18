@@ -4,7 +4,7 @@ import { createMemo, createSignal } from "solid-js";
 import { TICK_INTERVAL_MS, classifyChildCompletion, compareEntries, createLifecycleTracker, deduplicateCandidates, isAgentToolPart, isBackgroundInvocation, isLive, isVisible, parseLegacyBackgroundUpdates, readString, resolveChildReference, resolveLegacyBackgroundStatus, resolveToolStatus, } from "./agent-sidebar-state.js";
 import { createUpdateNotifier } from "./update-notifier.js";
 const PLUGIN_ID = "subagent-sidebar";
-const PLUGIN_VERSION = "0.2.4";
+const PLUGIN_VERSION = "0.2.5";
 const SIDEBAR_ORDER = 200;
 const DESCRIPTION_MAX_LEN = 26;
 const COLLAPSED_KV_KEY = "agents-panel.collapsed";

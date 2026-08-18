@@ -48,7 +48,7 @@ Add the GitHub spec to your OpenCode config. Edit `~/.config/opencode/opencode.j
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "github:psh4607/opencode-agent-sidebar#v0.2.0"
+    "github:psh4607/opencode-agent-sidebar#v0.2.5"
   ]
 }
 ```
@@ -120,8 +120,8 @@ OpenCode caches plugins indefinitely under `~/.cache/opencode/packages/<spec>/` 
 Edit your `opencode.json` plugin entry to bump the tag suffix:
 
 ```diff
-- "github:psh4607/opencode-agent-sidebar#v0.1.0"
-+ "github:psh4607/opencode-agent-sidebar#v0.2.0"
+- "github:psh4607/opencode-agent-sidebar#v0.2.4"
++ "github:psh4607/opencode-agent-sidebar#v0.2.5"
 ```
 
 Restart OpenCode. Each tag has its own cache directory, so the new version is fetched cleanly without touching the old one.

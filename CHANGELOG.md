@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.5] — 2026-08-18
+
 ### Fixed
 
 - Agent rows now derive only from real `task` / `delegate` tool parts, preventing historical `subtask` and `agent` prompt parts from reappearing as permanent activity and making reactive part removal immediate.
@@ -50,7 +52,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Auto-cleanup of completed entries after ~10 seconds.
 - Zero-config `github:` install — bundled `dist/` ships with the repo, no build step required at install time.
 
-[Unreleased]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/psh4607/opencode-agent-sidebar/compare/v0.2.4...v0.2.5
 [0.2.2]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.2
 [0.2.1]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.1
 [0.2.0]: https://github.com/psh4607/opencode-agent-sidebar/releases/tag/v0.2.0

@@ -1,6 +1,6 @@
 {
   "name": "@psh4607/opencode-agent-sidebar",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "OpenCode TUI plugin showing real-time sub-agent activity (foreground/background tasks, live elapsed timer) in the sidebar.",
   "type": "module",
   "license": "MIT",
