@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: typecheck + build
+    name: test + typecheck + build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +19,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Test
+        run: bun run test
 
       - name: Typecheck
         run: bun run typecheck

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Agent rows now derive only from real `task` / `delegate` tool parts, preventing historical `subtask` and `agent` prompt parts from reappearing as permanent activity and making reactive part removal immediate.
+- Native OpenCode background Task follows `sessionId` / `jobId` child sessions through busy, retry, idle, and late assistant-error updates, while resumed calls deduplicate immediately through `task_id` and existing OMO/legacy background fields remain supported across sidebar visibility changes.
+
 ## [0.2.2] — 2026-05-07
 
 ### Fixed
